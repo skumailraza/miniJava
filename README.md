@@ -1,9 +1,9 @@
 # miniJava
-Implementation of MiniJava Compiler as part of the project for the Compilers and Language Processing Tools course at Technical University of Kaiserslautern. 
+- Implementation of MiniJava Compiler as part of the project for the Compilers and Language Processing Tools course at Technical University of Kaiserslautern. 
 
-### Each ex_ folder contains the incremental implementation of MiniJava Compiler, from Parser to LLVM Translation and optimizations, as per the exercise sheets.
+- Each ex_ folder contains the incremental implementation of MiniJava Compiler, from Parser to LLVM Translation and optimizations, as per the exercise sheets.
 
-## The exercise specification sheets are in ex_specifications folder.
+### The exercise specification sheets are in ex_specifications folder.
 
 Supervisor: Dr. Annette Bieniusa
 Exercise Manager: M.Sc. Peter Zeller
