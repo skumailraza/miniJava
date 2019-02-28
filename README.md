@@ -8,13 +8,13 @@
 - Supervisor: Dr. Annette Bieniusa
 - Exercise Manager: M.Sc. Peter Zeller
 
-# TU Kaiserslautern
+#### TU Kaiserslautern
 
-## Fachbereich Informatik
+###### Fachbereich Informatik
 
-## AG Softwaretechnik
+###### AG Softwaretechnik
 
-# Course: Compiler and Language Processing Tools (WS 2018)
+#### Course: Compiler and Language Processing Tools (WS 2018)
 
 ## MiniJava
 
