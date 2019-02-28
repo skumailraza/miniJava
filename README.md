@@ -5,8 +5,8 @@
 
 ### The exercise specification sheets are in ex_specifications folder.
 
-Supervisor: Dr. Annette Bieniusa
-Exercise Manager: M.Sc. Peter Zeller
+- Supervisor: Dr. Annette Bieniusa
+- Exercise Manager: M.Sc. Peter Zeller
 
 # TU Kaiserslautern
 
