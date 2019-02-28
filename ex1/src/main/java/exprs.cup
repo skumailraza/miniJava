@@ -1,0 +1,169 @@
+package exprs;
+
+import calculator.ast.*;
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+
+
+class ExprParser;
+   
+// Parser code to change the way the parser reports errors (include
+// line and column number of the error). 
+parser code {:
+    
+    public static class ParserError extends RuntimeException {
+        private int line;
+        private int column;
+
+        public ParserError(String message, int line, int column) {
+            super(message);
+            this.line = line;
+            this.column = column;
+        }
+
+
+        public int getLine() {
+            return line;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        @Override
+        public String toString() {
+            return "Parser error in line " + line + ":" + column + ": " + getMessage();
+        }
+    }
+
+    private Consumer<ParserError> onError;
+
+    public void onError(Consumer<ParserError> onError) {
+        this.onError = onError;
+    }
+    
+
+    @Override
+    public void syntax_error(Symbol info) {
+
+        List<Integer> expectedTokens = expected_token_ids();
+        
+        int line, column;
+        StringBuilder message = new StringBuilder("Unexpected token ");
+        if (info instanceof ComplexSymbol) {
+            ComplexSymbol s = (ComplexSymbol) info;
+            line = s.getLeft().getLine();
+            column = s.getLeft().getColumn();
+            
+            message.append(s.getName());
+            
+            if (s.value != null) {
+                message.append("(");
+                message.append(s.value);
+                message.append(")");
+            }
+        } else {
+            line = cur_token.left;
+            column = cur_token.right;
+        }
+        
+        if (!expectedTokens.isEmpty()) {
+            message.append(", expected one of the following: ");
+            boolean first = true;
+            for (int expected : expectedTokens){
+                if (!first) {
+                    message.append(", ");
+                }
+                message.append(symbl_name_from_id(expected));
+                first = false;
+            }
+        }
+        
+        
+        ParserError err = new ParserError(message.toString(), line, column);
+        if (onError == null) {
+            System.err.println(err);
+        } else {
+            onError.accept(err);
+        }
+    }
+
+    @Override
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+    }
+    
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+//Terminals (tokens returned by the scanner).  
+terminal           PLUS, MINUS, TIMES, DIV, EQUALS, LESS, IF, THEN, ELSE, LET, EQ, IN, FUN
+                    , ARROW, LPAREN, RPAREN, INVALID_TOKEN;
+terminal String   NUMBER, ID;
+   
+// Non terminals used in the grammar section.  
+non terminal Expr   expr, factor, term, plus, min, mult, div, less, equals, app;
+   
+
+/* ----------------------------Grammar Section-------------------- */
+
+
+expr ::= FUN expr:id ARROW expr:b
+            {: RESULT = new ExprFunction(id, b); :}   
+        | IF expr:c THEN expr:f ELSE expr:l
+            {: RESULT = new ExprConditional(c, f, l); :}    
+        | LET expr:id EQ expr:v IN expr:b
+            {: RESULT = new ExprLet(id,v, b); :}
+        | plus:p
+            {: RESULT = p; :};
+
+plus ::= plus:l PLUS min:r 
+    	    {: RESULT = new ExprBinary(l, r, Operator.Plus); :}
+        | min:m
+            {: RESULT = m; :};
+            
+min ::= min:l MINUS mult:r 
+    		{: RESULT = new ExprBinary(l, r, Operator.Minus); :}
+        | mult:t
+            {: RESULT = t; :};
+
+mult ::= mult:l TIMES div:r 
+    		{: RESULT = new ExprBinary(l, r, Operator.Times); :}
+        | div:t
+            {: RESULT = t; :};
+
+div ::= div:l DIV less:r 
+    		{: RESULT = new ExprBinary(l, r, Operator.Div); :}
+        | less:t
+            {: RESULT = t; :};
+
+less ::= less:l LESS equals:r 
+    		{: RESULT = new ExprBinary(l, r, Operator.Less); :}
+        | equals:t
+            {: RESULT = t; :};
+
+equals ::= equals:l EQUALS app:r 
+    		{: RESULT = new ExprBinary(l, r, Operator.Equals); :}
+        | app:t
+            {: RESULT = t; :};
+            
+app ::= app:l term:r 
+    		{: RESULT = new ExprApplication(l, r); :}
+        | term:t
+            {: RESULT = t; :};
+                   
+
+term ::= NUMBER:n
+        	{: RESULT = new ExprNumber(n); :}
+        | ID:id
+            {: RESULT = new ExprIdentifier(id); :}
+        | LPAREN expr:e RPAREN
+            {: RESULT = e; :};
+
